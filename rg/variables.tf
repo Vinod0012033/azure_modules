@@ -1,29 +1,36 @@
 variable "context" {
+  description = "Spoke's context object — passed directly to child modules."
   type = object({
-    business             = string
-    business_tla         = string
-    application          = string
-    application_tla      = string
-    environment          = string
-    location             = string
-    location_tla         = string
-    contract_id          = string
-    spoke_type           = string
-    naming_convention    = string 
+    contract_id       = string
+    business          = string
+    business_tla      = string
+    application       = string
+    application_tla   = string
+    environment       = string
+    location          = string
+    location_tla      = string
+    naming_convention = optional(string, "v1")
   })
 }
 
-variable "instance" {
-  description = "Unique identifier (01, 02...)"
-  type        = string
+variable "secrets" {
+  description = "Spoke's secrets — passed directly to child modules."
+  type = object({
+    SERVICE_PRINCIPAL_CLIENT_ID     = optional(string, "")
+    SERVICE_PRINCIPAL_CLIENT_SECRET = optional(string, "")
+    TENANT_ID                       = optional(string, "")
+    SPOKE_SUBSCRIPTION_ID           = optional(string, "")
+  })
+  sensitive = true
+}
 
-  validation {
-    condition     = length(var.instance) >= 2
-    error_message = "Instance must be at least 2 characters"
-  }
+variable "instance" {
+  description = "Unique identifier for this resource (e.g. '001'). Must be at least 2 alphanumeric characters."
+  type        = string
 }
 
 variable "tags" {
-  type    = map(string)
-  default = {}
+  description = "Additional business-specific tags. Platform mandatory tags are applied automatically."
+  type        = map(any)
+  default     = {}
 }
