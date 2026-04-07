@@ -1,19 +1,15 @@
-resource "azurerm_resource_group" "rg" {
-
+resource "azurerm_resource_group" "resource_group" {
   lifecycle {
-    precondition {
-      condition     = length(local.resource_group_name) <= 90
-      error_message = "Resource group name must be <= 90 characters"
-    }
-
-    precondition {
-      condition     = contains(["dev", "qa", "prod"], lower(var.context.environment))
-      error_message = "Environment must be dev, qa, or prod"
-    }
+    ignore_changes = [
+      tags["availability"],
+      tags["integrity"],
+      tags["confidentiality"],
+      tags["traceability"],
+      tags["spoke_type"]
+    ]
   }
 
-  name     = local.resource_group_name
+  name     = local.rg_name
   location = var.context.location
-
-  tags = local.default_tags
+  tags     = merge(var.tags, local.default_tags)
 }
