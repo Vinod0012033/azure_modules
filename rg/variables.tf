@@ -1,15 +1,15 @@
 variable "context" {
-  description = "Platform context object"
   type = object({
-    business        = string
-    business_sht    = optional(string)
-    application     = string
-    application_sht = optional(string)
-    environment     = string
-    location        = string
-    location_sht    = optional(string)
-    contract_id     = string
-    spoke_type      = string
+    business             = string
+    business_tla         = string
+    application          = string
+    application_tla      = string
+    environment          = string
+    location             = string
+    location_tla         = string
+    contract_id          = string
+    spoke_type           = string
+    naming_convention    = string 
   })
 }
 
