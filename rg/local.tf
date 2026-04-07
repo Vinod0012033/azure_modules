@@ -22,6 +22,7 @@ locals {
     }
   }
 
+  # v1 = full names, v2 = TLA-based short names
   naming_convention_versions = {
     v1 = {
       rg_name = "rg-${local.naming_convention_blocks.full.dashes}-${var.instance}"
@@ -31,12 +32,6 @@ locals {
     }
   }
 
-  # IMPORTANT FIX (safe lookup with default)
-  naming_convention = lookup(
-    local.naming_convention_versions,
-    var.context.naming_convention,
-    local.naming_convention_versions["v1"]
-  )
-
-  rg_name = local.naming_convention.rg_name
+  naming_convention = local.naming_convention_versions[var.context.naming_convention]
+  rg_name           = local.naming_convention.rg_name
 }
