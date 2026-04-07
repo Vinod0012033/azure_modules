@@ -1,25 +1,29 @@
-locals {
-    module_metadata = jsondecode(file("${path.module}/metadata.json"))
+variable "context" {
+  description = "Platform context object"
+  type = object({
+    business        = string
+    business_sht    = optional(string)
+    application     = string
+    application_sht = optional(string)
+    environment     = string
+    location        = string
+    location_sht    = optional(string)
+    contract_id     = string
+    spoke_type      = string
+  })
+}
 
-    naming_convention_blocks = {
-        sht = {
-            dashes = "$(var.context.business_sht)-$(var.context.application_sht)-$(var.context.environment)-$(var.context.location_sht)"
-            no_dashes = "$(var.context.business_sht)$(var.context.application_sht)$(var.context.environment)$(var.context.location_sht)"
-        }
+variable "instance" {
+  description = "Unique identifier (01, 02...)"
+  type        = string
 
-        full = {
-            dashes = "$(var.context.business)-$(var.context.application)-$(var.context.environment)-$(var.context.location)"
-            no_dashes = "$(var.context.business)$(var.context.application)$(var.context.environment)$(var.context.location)"
-        }
-    }
-    resource_group_name = "rg-${local.naming_convention_blocks.dashes}-${var.instance}"
+  validation {
+    condition     = length(var.instance) >= 2
+    error_message = "Instance must be at least 2 characters"
+  }
+}
 
-    default_tags = {
-        "Business" = var.context.business
-        "Application" = var.context.application
-        "Environment" = var.context.environment
-        "Location" = var.context.location
-        "ContractId" = var.context.contract_id
-        "SpokeType" = var.context.spoke_type
-    }
+variable "tags" {
+  type    = map(string)
+  default = {}
 }
