@@ -1,21 +1,42 @@
-variable "context" {
-  description = "Platform context object"
-  type = object({
-    business        = string
-    business_sht    = optional(string)
-    application     = string
-    application_sht = optional(string)
-    environment     = string
-    location        = string
-    location_sht    = optional(string)
-    contract_id     = string
-    spoke_type      = string
-  })
-}
+locals {
+  module_metadata = jsondecode(file("${path.module}/module.json"))
 
-  validation {
-    condition     = length(var.instance) >= 2
-    error_message = "Instance must be at least 2 characters"
+  default_tags = {
+    contract_id    = var.context.contract_id
+    business       = var.context.business
+    application    = var.context.application
+    location       = var.context.location
+    environment    = var.context.environment
+    module_name    = local.module_metadata.name
+    module_version = local.module_metadata.version
   }
-}
 
+  naming_convention_blocks = {
+    tla = {
+      dashes    = "${var.context.business_tla}-${var.context.application_tla}-${var.context.environment}-${var.context.location_tla}"
+      no_dashes = "${var.context.business_tla}${var.context.application_tla}${var.context.environment}${var.context.location_tla}"
+    }
+    full = {
+      dashes    = "${var.context.business}-${var.context.application}-${var.context.environment}-${var.context.location}"
+      no_dashes = "${var.context.business}${var.context.application}${var.context.environment}${var.context.location}"
+    }
+  }
+
+  naming_convention_versions = {
+    v1 = {
+      rg_name = "rg-${local.naming_convention_blocks.full.dashes}-${var.instance}"
+    }
+    v2 = {
+      rg_name = "rg-${local.naming_convention_blocks.tla.dashes}-${var.instance}"
+    }
+  }
+
+  # IMPORTANT FIX (safe lookup with default)
+  naming_convention = lookup(
+    local.naming_convention_versions,
+    var.context.naming_convention,
+    local.naming_convention_versions["v1"]
+  )
+
+  rg_name = local.naming_convention.rg_name
+}
